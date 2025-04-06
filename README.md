@@ -1,214 +1,70 @@
-# @enemyrr/mcp-mysql-server
+# MCP MySQL Server for Cursor AI
 
-[![smithery badge](https://smithery.ai/badge/@enemyrr/mcp-mysql-server)](https://smithery.ai/server/@enemyrr/mcp-mysql-server)
+This is a configured MCP (Model Context Protocol) server that connects Cursor AI with your MySQL database via phpMyAdmin. This setup allows Cursor AI to execute SQL queries directly on your database, enhancing your development workflow.
 
-A Model Context Protocol server that provides MySQL database operations. This server enables AI models to interact with MySQL databases through a standardized interface.
+## Setup Instructions
 
-<a href="https://glama.ai/mcp/servers/hcqqd3qi8q"><img width="380" height="200" src="https://glama.ai/mcp/servers/hcqqd3qi8q/badge" alt="MCP-MySQL Server MCP server" /></a>
+### 1. Prerequisites
 
-## Installation & Setup for Cursor IDE
+- Node.js v18 or higher (you have v22.14.0 installed)
+- MySQL database (running via MAMP/phpMyAdmin)
 
-### Installing via Smithery
+### 2. Configuration
 
-To install MySQL Database Server for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@enemyrr/mcp-mysql-server):
+The server is configured to connect to your MySQL database with the following parameters:
+- Host: localhost
+- Port: 8889
+- User: root
+- Password: root
+- Database: hbwebsite
+
+These settings are stored in the `.env` file and can be modified if needed.
+
+### 3. Starting the Server
+
+To start the MCP server:
 
 ```bash
-npx -y @smithery/cli install @enemyrr/mcp-mysql-server --client claude
+./start-mcp-server.sh
 ```
 
-### Installing Manually
-1. Clone and build the project:
+This will run the server in the background. The script will display the process ID (PID) of the server.
+
+### 4. Stopping the Server
+
+To stop the MCP server:
+
 ```bash
-git clone https://github.com/enemyrr/mcp-mysql-server.git
-cd mcp-mysql-server
-npm install
-npm run build
+./stop-mcp-server.sh
 ```
 
-2. Add the server in Cursor IDE settings:
-   - Open Command Palette (Cmd/Ctrl + Shift + P)
-   - Search for "MCP: Add Server"
-   - Fill in the fields:
-     - Name: `mysql`
-     - Type: `command`
-     - Command: `node /absolute/path/to/mcp-mysql-server/build/index.js`
+### 5. Integrating with Cursor AI
 
-> **Note**: Replace `/absolute/path/to/` with the actual path where you cloned and built the project.
+To connect this MCP server with Cursor AI:
 
-## Database Configuration
+1. Open Cursor AI
+2. Go to Settings → Features → MCP Servers
+3. Click on "Add New MCP Server"
+4. Configure the server with:
+   - **Name:** MySQL Database
+   - **Type:** Command
+   - **Command:** The full path to the MCP server's executable: `/Applications/MAMP/htdocs/travelplanner/mcp-mysql-server/build/index.js`
 
-You can configure the database connection in three ways:
+After saving, Cursor AI will be able to interact with your MySQL database, allowing you to execute queries directly through the AI interface.
 
-1. **Database URL in .env** (Recommended):
-```env
-DATABASE_URL=mysql://user:password@host:3306/database
-```
+## Usage Examples
 
-2. **Individual Parameters in .env**:
-```env
-DB_HOST=localhost
-DB_USER=your_user
-DB_PASSWORD=your_password
-DB_DATABASE=your_database
-```
+Once connected, you can ask Cursor AI to:
 
-3. **Direct Connection via Tool**:
-```typescript
-use_mcp_tool({
-  server_name: "mysql",
-  tool_name: "connect_db",
-  arguments: {
-    url: "mysql://user:password@host:3306/database"
-    // OR
-    workspace: "/path/to/your/project" // Will use project's .env
-    // OR
-    host: "localhost",
-    user: "your_user",
-    password: "your_password",
-    database: "your_database"
-  }
-});
-```
+- Retrieve data from tables
+- Execute SQL queries
+- Analyze your database schema
+- Generate SQL queries based on your requirements
+- Debug database-related issues
 
-## Available Tools
+## Troubleshooting
 
-### 1. connect_db
-Connect to MySQL database using URL, workspace path, or direct credentials.
-
-### 2. query
-Execute SELECT queries with optional prepared statement parameters.
-
-```typescript
-use_mcp_tool({
-  server_name: "mysql",
-  tool_name: "query",
-  arguments: {
-    sql: "SELECT * FROM users WHERE id = ?",
-    params: [1]
-  }
-});
-```
-
-### 3. execute
-Execute INSERT, UPDATE, or DELETE queries with optional prepared statement parameters.
-
-```typescript
-use_mcp_tool({
-  server_name: "mysql",
-  tool_name: "execute",
-  arguments: {
-    sql: "INSERT INTO users (name, email) VALUES (?, ?)",
-    params: ["John Doe", "john@example.com"]
-  }
-});
-```
-
-### 4. list_tables
-List all tables in the connected database.
-
-```typescript
-use_mcp_tool({
-  server_name: "mysql",
-  tool_name: "list_tables"
-});
-```
-
-### 5. describe_table
-Get the structure of a specific table.
-
-```typescript
-use_mcp_tool({
-  server_name: "mysql",
-  tool_name: "describe_table",
-  arguments: {
-    table: "users"
-  }
-});
-```
-
-### 6. create_table
-Create a new table with specified fields and indexes.
-
-```typescript
-use_mcp_tool({
-  server_name: "mysql",
-  tool_name: "create_table",
-  arguments: {
-    table: "users",
-    fields: [
-      {
-        name: "id",
-        type: "int",
-        autoIncrement: true,
-        primary: true
-      },
-      {
-        name: "email",
-        type: "varchar",
-        length: 255,
-        nullable: false
-      }
-    ],
-    indexes: [
-      {
-        name: "email_idx",
-        columns: ["email"],
-        unique: true
-      }
-    ]
-  }
-});
-```
-
-### 7. add_column
-Add a new column to an existing table.
-
-```typescript
-use_mcp_tool({
-  server_name: "mysql",
-  tool_name: "add_column",
-  arguments: {
-    table: "users",
-    field: {
-      name: "phone",
-      type: "varchar",
-      length: 20,
-      nullable: true
-    }
-  }
-});
-```
-
-## Features
-
-- Multiple connection methods (URL, workspace, direct)
-- Secure connection handling with automatic cleanup
-- Prepared statement support for query parameters
-- Schema management tools
-- Comprehensive error handling and validation
-- TypeScript support
-- Automatic workspace detection
-
-## Security
-
-- Uses prepared statements to prevent SQL injection
-- Supports secure password handling through environment variables
-- Validates queries before execution
-- Automatically closes connections when done
-
-## Error Handling
-
-The server provides detailed error messages for:
-- Connection failures
-- Invalid queries or parameters
-- Missing configuration
-- Database errors
-- Schema validation errors
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request to https://github.com/enemyrr/mcp-mysql-server
-
-## License
-
-MIT
+- If the server fails to start, check if MAMP is running and your MySQL server is accessible
+- Verify that the database connection parameters in the `.env` file are correct
+- Make sure the port 12223 (default MCP port) is not in use by another application
+- Check the server's output for any error messages
